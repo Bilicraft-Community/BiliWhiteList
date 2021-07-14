@@ -99,7 +99,7 @@ public final class BiliWhiteList extends Plugin implements Listener {
         return whitelisted;
     }
 
-    @EventHandler(priority = EventPriority.LOW)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onJoin(LoginEvent event){
         UUID playerUniqueId = event.getConnection().getUniqueId();
         if(playerUniqueId == null){
@@ -112,6 +112,9 @@ public final class BiliWhiteList extends Plugin implements Listener {
             event.setCancelled(true);
             event.setCancelReason(TextComponent.fromLegacyText("您不在 Bilicraft 白名单中，请申请白名单或联系其他玩家邀请"));
             getLogger().info("玩家 "+event.getConnection().getName()+" # "+event.getConnection().getUniqueId()+" 没有白名单，已拒绝");
+        }else{
+            getLogger().info("玩家 "+event.getConnection().getName()+" # "+event.getConnection().getUniqueId()+" 白名单放行");
         }
+
     }
 }

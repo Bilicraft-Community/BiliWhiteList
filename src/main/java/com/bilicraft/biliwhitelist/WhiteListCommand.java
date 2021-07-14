@@ -36,7 +36,7 @@ public class WhiteListCommand extends Command {
             return;
         }
         if (args.length < 2) {
-            sender.sendMessage(ChatColor.RED + "参数错误: /whitelist <add/del/list> [name/uuid]; 由于偷懒，请使用/whitelist list的时候后面也跟一个有效玩家游戏用户名");
+            sender.sendMessage(ChatColor.RED + "参数错误: /whitelist <add/remove/list/query> [name/uuid]; 由于偷懒，请使用/whitelist list的时候后面也跟一个有效玩家游戏用户名");
             return;
         }
         sender.sendMessage(ChatColor.BLUE + "正在处理...");
@@ -63,7 +63,9 @@ public class WhiteListCommand extends Command {
                 BiliWhiteList.instance.getLogger().info(ChatColor.GREEN + "白名单添加成功：" + args[1] + " # " + uuid+", 操作员："+sender.getName());
                 break;
             case "del":
+            case "remove":
                 if (BiliWhiteList.instance.getWhitelisted().remove(uuid)) {
+                    sender.sendMessages(ChatColor.GREEN + "白名单删除成功：" + args[1] + " # " + uuid);
                     BiliWhiteList.instance.getLogger().info(ChatColor.GREEN + "白名单删除成功：" + args[1] + " # " + uuid+", 操作员："+sender.getName());
                 } else {
                     sender.sendMessages(ChatColor.RED + "玩家不在白名单中：" + args[1] + " # " + uuid);
@@ -71,6 +73,9 @@ public class WhiteListCommand extends Command {
                 break;
             case "list":
                 sender.sendMessage(ChatColor.GREEN + "白名单玩家：" + BiliWhiteList.instance.getWhitelisted());
+                break;
+            case "query":
+                sender.sendMessage(ChatColor.GREEN+"该玩家白名单状态："+BiliWhiteList.instance.getWhitelisted().contains(uuid));
                 break;
             default:
                 sender.sendMessage(ChatColor.RED + "参数有误");

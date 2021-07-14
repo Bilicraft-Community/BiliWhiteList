@@ -47,7 +47,7 @@ public class WhoInviteCommand extends Command {
             return;
         }
         String inviterStr = BiliWhiteList.instance.getInviteRecord(uuid);
-        if (inviterStr == null) {
+        if (inviterStr == null || inviterStr.isEmpty()) {
             sender.sendMessages(ChatColor.RED + "该玩家无人邀请");
             return;
         }
