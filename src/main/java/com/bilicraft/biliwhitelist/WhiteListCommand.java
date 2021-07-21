@@ -67,6 +67,7 @@ public class WhiteListCommand extends Command {
                 if (BiliWhiteList.instance.getWhitelisted().remove(uuid)) {
                     sender.sendMessages(ChatColor.GREEN + "白名单删除成功：" + args[1] + " # " + uuid);
                     BiliWhiteList.instance.getLogger().info(ChatColor.GREEN + "白名单删除成功：" + args[1] + " # " + uuid+", 操作员："+sender.getName());
+                    BiliWhiteList.instance.saveWhitelisted();
                 } else {
                     sender.sendMessages(ChatColor.RED + "玩家不在白名单中：" + args[1] + " # " + uuid);
                 }
