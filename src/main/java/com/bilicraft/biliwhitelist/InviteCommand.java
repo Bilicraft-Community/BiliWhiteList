@@ -70,6 +70,7 @@ public class InviteCommand extends Command {
             BiliWhiteList.instance.saveWhitelisted();
             sender.sendMessage(ChatColor.GREEN + "邀请成功");
             BiliWhiteList.instance.getLogger().info("玩家 " + sender.getName() + " 邀请了 " + args[0]);
+            Util.broadcastToAdmins("玩家 " + sender.getName() + " 邀请了 " + args[0]);
         }
     }
 }
