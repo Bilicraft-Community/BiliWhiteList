@@ -61,13 +61,13 @@ public class WhiteListCommand extends Command {
                 BiliWhiteList.instance.saveWhitelisted();
                 sender.sendMessages(ChatColor.GREEN + "添加成功：" + args[1] + " # " + uuid);
                 BiliWhiteList.instance.getLogger().info(ChatColor.GREEN + "白名单添加成功：" + args[1] + " # " + uuid + ", 操作员：" + sender.getName());
-                Util.broadcastToAdmins(ChatColor.GREEN + "白名单添加成功：" + args[1] + ", 操作员：" + sender.getName());
+                Util.broadcastToAdmins(ChatColor.GREEN + "[广播]白名单添加：" + args[1] + ", 操作员：" + sender.getName());
                 break;
             case "del":
             case "remove":
                 if (BiliWhiteList.instance.getWhitelisted().remove(uuid)) {
                     BiliWhiteList.instance.saveWhitelisted();
-                    sender.sendMessages(ChatColor.GREEN + "白名单删除成功：" + args[1] + " # " + uuid);
+                    sender.sendMessages(ChatColor.GREEN + "[广播]白名单删除：" + args[1] + " # " + uuid);
                     BiliWhiteList.instance.getLogger().info(ChatColor.GREEN + "白名单删除成功：" + args[1] + " # " + uuid + ", 操作员：" + sender.getName());
                     Util.broadcastToAdmins(ChatColor.GREEN + "白名单删除成功：" + args[1] + ", 操作员：" + sender.getName());
                 } else {
