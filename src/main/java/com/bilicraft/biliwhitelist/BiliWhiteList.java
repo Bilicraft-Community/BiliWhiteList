@@ -3,6 +3,7 @@ package com.bilicraft.biliwhitelist;
 import lombok.SneakyThrows;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.config.ListenerInfo;
 import net.md_5.bungee.api.event.LoginEvent;
 import net.md_5.bungee.api.event.ServerConnectEvent;
 import net.md_5.bungee.api.plugin.Listener;
@@ -17,9 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public final class BiliWhiteList extends Plugin implements Listener {
@@ -55,6 +54,20 @@ public final class BiliWhiteList extends Plugin implements Listener {
         ProxyServer.getInstance().getPluginManager().registerCommand(this, new InviteCommand("invite"));
         ProxyServer.getInstance().getPluginManager().registerCommand(this, new WhoInviteCommand("whoinvite"));
         ProxyServer.getInstance().getPluginManager().registerListener(this, this);
+    }
+
+    private Map<String, String> getForcedHosts() {
+        Map<String, String> hosts = new HashMap<>();
+        for (ListenerInfo info : this.getProxy().getConfigurationAdapter().getListeners()) {
+            for (Map.Entry<String, String> host : info.getForcedHosts().entrySet()) {
+                hosts.put(host.getKey().toLowerCase(), host.getValue().toLowerCase());
+            }
+        }
+        return hosts;
+    }
+
+    private String getForcedHost(String virtualHost) { //Maybe null
+        return getForcedHosts().get(virtualHost);
     }
 
 
@@ -134,12 +147,7 @@ public final class BiliWhiteList extends Plugin implements Listener {
         UUID playerUniqueId = event.getPlayer().getUniqueId();
         if (!this.whitelisted.contains(playerUniqueId)) {
             event.setCancelled(true);
-            if (event.getReason() == ServerConnectEvent.Reason.JOIN_PROXY) {
-                event.getPlayer().disconnect(TextComponent.fromLegacyText("您不在 Bilicraft 白名单中，请申请白名单或联系其他玩家邀请"));
-                getLogger().info("玩家 " + event.getPlayer().getName() + " # " + event.getPlayer().getUniqueId() + " 没有白名单，已拒绝: " + event.getTarget().getName());
-            } else {
-                event.getPlayer().sendMessage(TextComponent.fromLegacyText("您不在 Bilicraft 白名单中，无法连接到 " + event.getTarget().getName() + " 服务器。请申请白名单或联系其他玩家邀请。"));
-            }
+            event.getPlayer().sendMessage(TextComponent.fromLegacyText("您不在 Bilicraft 白名单中，无法连接到 " + event.getTarget().getName() + " 服务器。请申请白名单或联系其他玩家邀请。"));
         } else {
             getLogger().info("玩家 " + event.getPlayer().getName() + " # " + event.getPlayer().getUniqueId() + " 白名单放行： " + event.getTarget().getName());
         }
@@ -147,21 +155,27 @@ public final class BiliWhiteList extends Plugin implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onJoin(LoginEvent event) {
-        if(excludes.getStringList("excludes").isEmpty()) {
-            UUID playerUniqueId = event.getConnection().getUniqueId();
-            if (playerUniqueId == null) {
-                event.setCancelled(true);
-                event.setCancelReason(TextComponent.fromLegacyText("Bilicraft 是正版服务器，请使用正版 Minecraft 账号登录"));
-                getLogger().info("玩家 " + event.getConnection().getName() + " # " + event.getConnection().getUniqueId() + " 不是正版 Minecraft 账号，已拒绝");
-                return;
-            }
-            if (!this.whitelisted.contains(playerUniqueId)) {
-                event.setCancelled(true);
-                event.setCancelReason(TextComponent.fromLegacyText("您不在 Bilicraft 白名单中，请申请白名单或联系其他玩家邀请"));
-                getLogger().info("玩家 " + event.getConnection().getName() + " # " + event.getConnection().getUniqueId() + " 没有白名单，已拒绝");
-            } else {
-                getLogger().info("玩家 " + event.getConnection().getName() + " # " + event.getConnection().getUniqueId() + " 白名单放行");
-            }
+        UUID playerUniqueId = event.getConnection().getUniqueId();
+        if (playerUniqueId == null) {
+            event.setCancelled(true);
+            event.setCancelReason(TextComponent.fromLegacyText("Bilicraft 是正版服务器，请使用正版 Minecraft 账号登录"));
+            getLogger().info("玩家 " + event.getConnection().getName() + " # " + event.getConnection().getUniqueId() + " 不是正版 Minecraft 账号，已拒绝");
+            return;
+        }
+
+        String forcedHost = getForcedHost(event.getConnection().getVirtualHost().getHostString());
+
+        if (excludes.getStringList("excludes").contains(forcedHost)) {
+            getLogger().info("玩家 " + event.getConnection().getName() + " # " + event.getConnection().getUniqueId() + " 例外列表放行： " + forcedHost);
+            return;
+        }
+
+        if (!this.whitelisted.contains(playerUniqueId)) {
+            event.setCancelled(true);
+            event.setCancelReason(TextComponent.fromLegacyText("您不在 Bilicraft 白名单中，请申请白名单或联系其他玩家邀请"));
+            getLogger().info("玩家 " + event.getConnection().getName() + " # " + event.getConnection().getUniqueId() + " 没有白名单，已拒绝");
+        } else {
+            getLogger().info("玩家 " + event.getConnection().getName() + " # " + event.getConnection().getUniqueId() + " 白名单放行");
         }
     }
 }
