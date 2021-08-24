@@ -39,8 +39,9 @@ public class HistoryManager {
     public List<UUID> getInvited(UUID inviter){
         List<UUID> list = new ArrayList<>();
         historyConfig.getKeys().forEach(key->{
-            UUID keyUniqueId = UUID.fromString(historyConfig.getString(key));
-            if(keyUniqueId.equals(inviter)){
+            UUID valueUniqueId = UUID.fromString(historyConfig.getString(key));
+            UUID keyUniqueId = UUID.fromString(key);
+            if(valueUniqueId.equals(inviter)){
                 list.add(keyUniqueId);
             }
         });

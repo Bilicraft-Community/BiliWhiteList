@@ -39,14 +39,14 @@ public class InviteListCommand extends Command {
         try {
             Profile profile = plugin.getResolver().findByName(args[0]);
             if (profile == null) {
-                sender.sendMessages(ChatColor.RED + "您所邀请的玩家不存在，请检查用户名输入是否正确");
+                sender.sendMessages(ChatColor.RED + "您所查询的玩家不存在，请检查用户名输入是否正确");
                 return;
             }
 
             List<UUID> inviteds = plugin.getHistoryManager().getInvited(profile.getUniqueId());
             ImmutableList<Profile> invitesProfile = plugin.getResolver().findAllByUuid(inviteds);
             for (Profile invited : invitesProfile) {
-                sender.sendMessage(ChatColor.YELLOW + "- " + ChatColor.AQUA + invited.getName());
+                sender.sendMessage(ChatColor.YELLOW + "- " + ChatColor.AQUA + invited.getName() +"("+invited.getUniqueId()+")");
             }
         } catch (IOException | InterruptedException e) {
             sender.sendMessages(ChatColor.RED + "内部错误，请稍后重试。错误代码：" + ChatColor.GRAY + e.getMessage());

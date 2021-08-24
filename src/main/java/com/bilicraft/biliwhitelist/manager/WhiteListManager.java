@@ -31,6 +31,7 @@ public class WhiteListManager {
         List<String> whitelist = whiteListConfig.getStringList("whitelist");
         if(whitelist.contains(player.toString())) return;
         whitelist.add(player.toString());
+        whiteListConfig.set("whitelist", whitelist);
         ConfigurationProvider.getProvider(YamlConfiguration.class).save(whiteListConfig, whiteListFile);
     }
 
@@ -38,6 +39,7 @@ public class WhiteListManager {
     public void removeWhiteList(UUID player){
         List<String> whitelist = whiteListConfig.getStringList("whitelist");
         whitelist.remove(player.toString());
+        whiteListConfig.set("whitelist", whitelist);
         ConfigurationProvider.getProvider(YamlConfiguration.class).save(whiteListConfig, whiteListFile);
     }
 
