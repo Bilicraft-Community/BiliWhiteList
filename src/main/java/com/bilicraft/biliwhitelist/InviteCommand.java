@@ -1,12 +1,10 @@
 package com.bilicraft.biliwhitelist;
 
-import me.kbrewster.exceptions.APIException;
-import me.kbrewster.exceptions.InvalidPlayerException;
-import me.kbrewster.mojangapi.MojangAPI;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
+import org.enginehub.squirrelid.Profile;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -47,30 +45,27 @@ public class InviteCommand extends Command {
 
         if (args.length == 2) {
             sender.sendMessage(ChatColor.BLUE + "正在处理，请稍等...");
-            UUID uuid;
             try {
-                uuid = MojangAPI.getUUID(args[0]);
-            } catch (IOException exception) {
+                Profile profile = Util.getResolver().findByName(args[0]);
+                if(profile == null){
+                    sender.sendMessages(ChatColor.RED+"您所邀请的玩家不存在，请检查用户名输入是否正确");
+                    return;
+                }
+                UUID uuid = profile.getUniqueId();
+                if(BiliWhiteList.instance.getWhitelisted().contains(uuid)) {
+                    sender.sendMessages(ChatColor.RED + "您所邀请的玩家当前已在白名单中，无需重复邀请");
+                    return;
+                }
+                BiliWhiteList.instance.inviteRecord(((ProxiedPlayer) sender).getUniqueId(),uuid);
+                BiliWhiteList.instance.getWhitelisted().add(uuid);
+                BiliWhiteList.instance.saveWhitelisted();
+                sender.sendMessage(ChatColor.GREEN + "邀请成功");
+                BiliWhiteList.instance.getLogger().info("玩家 " + sender.getName() + " 邀请了 " + args[0]);
+                Util.broadcastToAdmins("玩家 " + sender.getName() + " 邀请了 " + args[0]);
+            } catch (IOException | InterruptedException exception) {
                 sender.sendMessages(ChatColor.RED+"网络错误，请稍后重试。错误代码："+ChatColor.GRAY+exception.getMessage());
-                return;
-            } catch (APIException exception) {
-                sender.sendMessages(ChatColor.RED+"Mojang API返回了错误响应："+ChatColor.GRAY+exception.getMessage());
-                return;
-            }catch (InvalidPlayerException e){
-                sender.sendMessages(ChatColor.RED+"您所邀请的玩家不存在，请检查用户名输入是否正确");
-                return;
             }
 
-            if(BiliWhiteList.instance.getWhitelisted().contains(uuid)) {
-                sender.sendMessages(ChatColor.RED + "您所邀请的玩家当前已在白名单中，无需重复邀请");
-                return;
-            }
-            BiliWhiteList.instance.inviteRecord(((ProxiedPlayer) sender).getUniqueId(),uuid);
-            BiliWhiteList.instance.getWhitelisted().add(uuid);
-            BiliWhiteList.instance.saveWhitelisted();
-            sender.sendMessage(ChatColor.GREEN + "邀请成功");
-            BiliWhiteList.instance.getLogger().info("玩家 " + sender.getName() + " 邀请了 " + args[0]);
-            Util.broadcastToAdmins("玩家 " + sender.getName() + " 邀请了 " + args[0]);
         }
     }
 }

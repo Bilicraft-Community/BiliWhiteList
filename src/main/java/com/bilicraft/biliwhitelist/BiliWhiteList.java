@@ -13,6 +13,7 @@ import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
+import org.enginehub.squirrelid.Profile;
 
 import java.io.File;
 import java.io.IOException;
@@ -53,6 +54,7 @@ public final class BiliWhiteList extends Plugin implements Listener {
         ProxyServer.getInstance().getPluginManager().registerCommand(this, new WhiteListCommand("whitelist", "whitelist.admin"));
         ProxyServer.getInstance().getPluginManager().registerCommand(this, new InviteCommand("invite"));
         ProxyServer.getInstance().getPluginManager().registerCommand(this, new WhoInviteCommand("whoinvite"));
+        ProxyServer.getInstance().getPluginManager().registerCommand(this, new InviteListCommand("invitelist"));
         ProxyServer.getInstance().getPluginManager().registerListener(this, this);
     }
 
@@ -111,6 +113,21 @@ public final class BiliWhiteList extends Plugin implements Listener {
         }
     }
 
+    public List<UUID> getInvitedRecords(UUID inviter){
+        List<UUID> inviteds = new ArrayList<>();
+        try {
+            Configuration history = ConfigurationProvider.getProvider(YamlConfiguration.class).load(new File(getDataFolder(), "history.yml"));
+            history.getKeys().forEach(key->{
+               if(history.getString(key).equals(inviter.toString())){
+                   inviteds.add(UUID.fromString(key));
+               }
+            });
+        } catch (IOException exception) {
+            exception.printStackTrace();
+        }
+        return inviteds;
+    }
+
     @Override
     public void onDisable() {
 
@@ -162,14 +179,12 @@ public final class BiliWhiteList extends Plugin implements Listener {
             getLogger().info("玩家 " + event.getConnection().getName() + " # " + event.getConnection().getUniqueId() + " 不是正版 Minecraft 账号，已拒绝");
             return;
         }
-
+        Util.getCache().put(new Profile(playerUniqueId,event.getConnection().getName()));
         String forcedHost = getForcedHost(event.getConnection().getVirtualHost().getHostString());
-
         if (excludes.getStringList("excludes").contains(forcedHost)) {
             getLogger().info("玩家 " + event.getConnection().getName() + " # " + event.getConnection().getUniqueId() + " 例外列表放行： " + forcedHost);
             return;
         }
-
         if (!this.whitelisted.contains(playerUniqueId)) {
             event.setCancelled(true);
             event.setCancelReason(TextComponent.fromLegacyText("您不在 Bilicraft 白名单中，请申请白名单或联系其他玩家邀请"));

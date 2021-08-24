@@ -15,6 +15,14 @@
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>apache.snapshots</id>
+            <url>https://repository.apache.org/snapshots/</url>
+        </pluginRepository>
+    </pluginRepositories>
+
+
 
     <build>
         <defaultGoal>clean package</defaultGoal>
@@ -31,7 +39,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.2.4</version>
+                <version>3.3.0-SNAPSHOT</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -40,6 +48,16 @@
                         </goals>
                         <configuration>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <relocations>
+                                <relocation>
+                                    <pattern>org.enginehub.squirrelid.</pattern>
+                                    <shadedPattern>com.bilicraft.biliwhitelist.shade.org.enginehub.squirrelid.</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.google.guava.guava.</pattern>
+                                    <shadedPattern>com.bilicraft.biliwhitelist.shade.com.google.guava.guava.</shadedPattern>
+                                </relocation>
+                            </relocations>
                         </configuration>
                     </execution>
                 </executions>
@@ -62,6 +80,10 @@
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
         </repository>
+        <repository>
+            <id>enginehub-repo</id>
+            <url>https://maven.enginehub.org/repo/</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -72,15 +94,30 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.github.KevinPriv</groupId>
-            <artifactId>MojangAPI</artifactId>
-            <version>1.0</version>
-        </dependency>
-        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.20</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.enginehub</groupId>
+            <artifactId>squirrelid</artifactId>
+            <version>0.3.0</version>
+            <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <artifactId>paper-api</artifactId>
+                    <groupId>com.destroystokyo.paper</groupId>
+                </exclusion>
+            </exclusions>
+            <type>jar</type>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>30.1.1-jre</version>
+        </dependency>
+
     </dependencies>
 </project>
