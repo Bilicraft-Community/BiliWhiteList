@@ -1,5 +1,6 @@
 package com.bilicraft.biliwhitelist;
 
+import com.google.common.collect.ImmutableList;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.plugin.Command;
@@ -10,13 +11,15 @@ import java.util.List;
 import java.util.UUID;
 
 public class InviteListCommand extends Command {
+    private final BiliWhiteList plugin;
     /**
      * Construct a new command with no permissions or aliases.
      *
      * @param name the name of this command
      */
-    public InviteListCommand(String name) {
+    public InviteListCommand(BiliWhiteList plugin, String name) {
         super(name);
+        this.plugin = plugin;
     }
 
     /**
@@ -34,14 +37,15 @@ public class InviteListCommand extends Command {
         sender.sendMessage(ChatColor.BLUE + "正在查询，请稍后...");
 
         try {
-            Profile profile = Util.getResolver().findByName(args[0]);
+            Profile profile = plugin.getResolver().findByName(args[0]);
             if (profile == null) {
                 sender.sendMessages(ChatColor.RED + "您所邀请的玩家不存在，请检查用户名输入是否正确");
                 return;
             }
 
-            List<UUID> inviteds = BiliWhiteList.instance.getInvitedRecords(profile.getUniqueId());
-            for (Profile invited : Util.getResolver().findAllByUuid(inviteds)) {
+            List<UUID> inviteds = plugin.getHistoryManager().getInvited(profile.getUniqueId());
+            ImmutableList<Profile> invitesProfile = plugin.getResolver().findAllByUuid(inviteds);
+            for (Profile invited : invitesProfile) {
                 sender.sendMessage(ChatColor.YELLOW + "- " + ChatColor.AQUA + invited.getName());
             }
         } catch (IOException | InterruptedException e) {

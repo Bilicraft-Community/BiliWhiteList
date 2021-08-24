@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.UUID;
 
 public class WhiteListCommand extends Command {
+    private final BiliWhiteList plugin;
     /**
      * Construct a new command.
      *
@@ -17,8 +18,9 @@ public class WhiteListCommand extends Command {
      *                   null or empty string allows it to be executed by everyone
      * @param aliases    aliases which map back to this command
      */
-    public WhiteListCommand(String name, String permission, String... aliases) {
+    public WhiteListCommand(BiliWhiteList plugin, String name, String permission, String... aliases) {
         super(name, permission, aliases);
+        this.plugin = plugin;
     }
 
     /**
@@ -40,7 +42,7 @@ public class WhiteListCommand extends Command {
         sender.sendMessage(ChatColor.BLUE + "正在处理...");
 
         try {
-            Profile profile = Util.getResolver().findByName(args[1]);
+            Profile profile = plugin.getResolver().findByName(args[1]);
             if(profile == null){
                 sender.sendMessages(ChatColor.RED + "该玩家不存在");
                 return;
@@ -48,28 +50,35 @@ public class WhiteListCommand extends Command {
             UUID uuid = profile.getUniqueId();
             switch (args[0]) {
                 case "add":
-                    BiliWhiteList.instance.getWhitelisted().add(uuid);
-                    BiliWhiteList.instance.saveWhitelisted();
+                    plugin.getWhiteListManager().addWhiteList(uuid);
                     sender.sendMessages(ChatColor.GREEN + "添加成功：" + args[1] + " # " + uuid);
-                    BiliWhiteList.instance.getLogger().info(ChatColor.GREEN + "白名单添加成功：" + args[1] + " # " + uuid + ", 操作员：" + sender.getName());
+                    plugin.getLogger().info(ChatColor.GREEN + "白名单添加成功：" + args[1] + " # " + uuid + ", 操作员：" + sender.getName());
                     Util.broadcastToAdmins(ChatColor.GREEN + "[广播]白名单添加：" + args[1] + ", 操作员：" + sender.getName());
                     break;
                 case "del":
                 case "remove":
-                    if (BiliWhiteList.instance.getWhitelisted().remove(uuid)) {
-                        BiliWhiteList.instance.saveWhitelisted();
+                    if (plugin.getWhiteListManager().isWhiteListed(uuid)) {
+                        plugin.getWhiteListManager().removeWhiteList(uuid);
                         sender.sendMessages(ChatColor.GREEN + "[广播]白名单删除：" + args[1] + " # " + uuid);
-                        BiliWhiteList.instance.getLogger().info(ChatColor.GREEN + "白名单删除成功：" + args[1] + " # " + uuid + ", 操作员：" + sender.getName());
+                        plugin.getLogger().info(ChatColor.GREEN + "白名单删除成功：" + args[1] + " # " + uuid + ", 操作员：" + sender.getName());
                         Util.broadcastToAdmins(ChatColor.GREEN + "白名单删除成功：" + args[1] + ", 操作员：" + sender.getName());
                     } else {
                         sender.sendMessages(ChatColor.RED + "玩家不在白名单中：" + args[1] + " # " + uuid);
                     }
                     break;
                 case "list":
-                    sender.sendMessage(ChatColor.GREEN + "白名单玩家：" + BiliWhiteList.instance.getWhitelisted());
+                    sender.sendMessage(ChatColor.GREEN + "白名单玩家：" + plugin.getWhiteListManager().formatAllInWhiteList());
                     break;
                 case "query":
-                    sender.sendMessage(ChatColor.GREEN + "该玩家白名单状态：" + BiliWhiteList.instance.getWhitelisted().contains(uuid));
+                    if(!plugin.getWhiteListManager().isWhiteListed(uuid)){
+                        sender.sendMessage(ChatColor.GREEN + "该玩家白名单状态：无白名单");
+                        break;
+                    }
+                    if(plugin.getHistoryManager().getInviter(uuid).isPresent()){
+                        sender.sendMessage(ChatColor.GREEN + "该玩家白名单状态：有白名单 (邀请进入)");
+                    }else{
+                        sender.sendMessage(ChatColor.GREEN + "该玩家白名单状态：有白名单 (管理添加)");
+                    }
                     break;
                 default:
                     sender.sendMessage(ChatColor.RED + "参数有误");

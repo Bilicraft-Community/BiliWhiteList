@@ -8,15 +8,16 @@ import org.enginehub.squirrelid.Profile;
 
 import java.io.IOException;
 import java.util.UUID;
-
 public class InviteCommand extends Command {
+    private final BiliWhiteList plugin;
     /**
      * Construct a new command with no permissions or aliases.
      *
      * @param name the name of this command
      */
-    public InviteCommand(String name) {
+    public InviteCommand(BiliWhiteList plugin, String name) {
         super(name);
+        this.plugin = plugin;
     }
 
     /**
@@ -46,21 +47,20 @@ public class InviteCommand extends Command {
         if (args.length == 2) {
             sender.sendMessage(ChatColor.BLUE + "正在处理，请稍等...");
             try {
-                Profile profile = Util.getResolver().findByName(args[0]);
+                Profile profile = plugin.getResolver().findByName(args[0]);
                 if(profile == null){
                     sender.sendMessages(ChatColor.RED+"您所邀请的玩家不存在，请检查用户名输入是否正确");
                     return;
                 }
-                UUID uuid = profile.getUniqueId();
-                if(BiliWhiteList.instance.getWhitelisted().contains(uuid)) {
+                UUID invited = profile.getUniqueId();
+                if(plugin.getWhiteListManager().isWhiteListed(invited)) {
                     sender.sendMessages(ChatColor.RED + "您所邀请的玩家当前已在白名单中，无需重复邀请");
                     return;
                 }
-                BiliWhiteList.instance.inviteRecord(((ProxiedPlayer) sender).getUniqueId(),uuid);
-                BiliWhiteList.instance.getWhitelisted().add(uuid);
-                BiliWhiteList.instance.saveWhitelisted();
+                plugin.getHistoryManager().record(((ProxiedPlayer) sender).getUniqueId(), invited);
+                plugin.getWhiteListManager().addWhiteList(invited);
                 sender.sendMessage(ChatColor.GREEN + "邀请成功");
-                BiliWhiteList.instance.getLogger().info("玩家 " + sender.getName() + " 邀请了 " + args[0]);
+                plugin.getLogger().info("玩家 " + sender.getName() + " 邀请了 " + args[0]);
                 Util.broadcastToAdmins("玩家 " + sender.getName() + " 邀请了 " + args[0]);
             } catch (IOException | InterruptedException exception) {
                 sender.sendMessages(ChatColor.RED+"网络错误，请稍后重试。错误代码："+ChatColor.GRAY+exception.getMessage());
