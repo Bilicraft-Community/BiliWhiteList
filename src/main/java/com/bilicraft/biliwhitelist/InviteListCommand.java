@@ -1,6 +1,5 @@
 package com.bilicraft.biliwhitelist;
 
-import com.google.common.collect.ImmutableList;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.plugin.Command;
@@ -18,7 +17,7 @@ public class InviteListCommand extends Command {
      * @param name the name of this command
      */
     public InviteListCommand(BiliWhiteList plugin, String name) {
-        super(name);
+        super(name,"whitelist.staff");
         this.plugin = plugin;
     }
 
@@ -34,7 +33,7 @@ public class InviteListCommand extends Command {
             sender.sendMessage(ChatColor.RED + "用法: /invitelist <玩家ID>");
             return;
         }
-        sender.sendMessage(ChatColor.BLUE + "正在查询，请稍后...");
+        sender.sendMessage(ChatColor.BLUE + "正在查询，请稍后（这可能需要很长一段时间）...");
 
         try {
             Profile profile = plugin.getResolver().findByName(args[0]);
@@ -44,10 +43,18 @@ public class InviteListCommand extends Command {
             }
 
             List<UUID> inviteds = plugin.getHistoryManager().getInvited(profile.getUniqueId());
-            ImmutableList<Profile> invitesProfile = plugin.getResolver().findAllByUuid(inviteds);
-            for (Profile invited : invitesProfile) {
-                sender.sendMessage(ChatColor.YELLOW + "- " + ChatColor.AQUA + invited.getName() +"("+invited.getUniqueId()+")");
+
+            for (UUID invited : inviteds) {
+                try {
+                    Profile invitedProfile = plugin.getResolver().findByUuid(invited);
+                    if (invitedProfile != null) {
+                        sender.sendMessage(ChatColor.YELLOW + "- " + ChatColor.AQUA + invitedProfile.getName() +ChatColor.DARK_GRAY+ " (" + invitedProfile.getUniqueId() + ")");
+                    }
+                }catch (IllegalArgumentException exception){
+                    sender.sendMessage(ChatColor.YELLOW + "- " + ChatColor.AQUA + "读取失败" +ChatColor.DARK_GRAY+ " (" + invited.toString() + ")");
+                }
             }
+            sender.sendMessage(ChatColor.BLUE + "查询完毕！");
         } catch (IOException | InterruptedException e) {
             sender.sendMessages(ChatColor.RED + "内部错误，请稍后重试。错误代码：" + ChatColor.GRAY + e.getMessage());
         }

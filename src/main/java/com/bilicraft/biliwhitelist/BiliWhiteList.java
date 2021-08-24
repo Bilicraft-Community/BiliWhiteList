@@ -63,6 +63,7 @@ public final class BiliWhiteList extends Plugin implements Listener {
         saveDefaultConfig();
         // 初始化NameMapping
         this.cache = new SQLiteCache(new File(getDataFolder(),"cache.db"));
+        //this.cache = new HashMapCache();
         this.resolver = new CacheForwardingService(HttpRepositoryService.forMinecraft(), cache);
         ProxyServer.getInstance().getPluginManager().registerCommand(this, new WhiteListCommand(this,"whitelist", "whitelist.admin"));
         ProxyServer.getInstance().getPluginManager().registerCommand(this, new InviteCommand(this,"invite"));
