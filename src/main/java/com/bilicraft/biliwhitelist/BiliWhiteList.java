@@ -115,7 +115,7 @@ public final class BiliWhiteList extends Plugin implements Listener {
             return;
         }
         UUID playerUniqueId = event.getPlayer().getUniqueId();
-        if (!whiteListManager.isWhiteListed(playerUniqueId)) {
+        if (!whiteListManager.isAllowed(playerUniqueId)) {
             event.setCancelled(true);
             event.getPlayer().sendMessage(TextComponent.fromLegacyText("您不在 Bilicraft 白名单中，无法连接到 " + event.getTarget().getName() + " 服务器。请申请白名单或联系其他玩家邀请。"));
         } else {
@@ -138,7 +138,7 @@ public final class BiliWhiteList extends Plugin implements Listener {
             getLogger().info("玩家 " + event.getConnection().getName() + " # " + event.getConnection().getUniqueId() + " 例外列表放行： " + forcedHost);
             return;
         }
-        if (!whiteListManager.isWhiteListed(playerUniqueId)) {
+        if (!whiteListManager.isAllowed(playerUniqueId)) {
             event.setCancelled(true);
             event.setCancelReason(TextComponent.fromLegacyText("您不在 Bilicraft 白名单中，请申请白名单或联系其他玩家邀请"));
             getLogger().info("玩家 " + event.getConnection().getName() + " # " + event.getConnection().getUniqueId() + " 没有白名单，已拒绝");
