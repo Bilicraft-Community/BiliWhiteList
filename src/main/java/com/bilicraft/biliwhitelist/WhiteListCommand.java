@@ -58,7 +58,7 @@ public class WhiteListCommand extends Command {
                     plugin.getWhiteListManager().addWhiteList(uuid);
                     sender.sendMessages(ChatColor.GREEN + "添加成功：" + args[1] + " # " + uuid);
                     plugin.getLogger().info(ChatColor.GREEN + "白名单添加成功：" + args[1] + " # " + uuid + ", 操作员：" + sender.getName());
-                    Util.broadcastToAdmins(ChatColor.GREEN + "[广播]白名单添加：" + args[1] + ", 操作员：" + sender.getName());
+                    Util.broadcast(ChatColor.GREEN + "[广播]白名单添加：" + args[1] + ", 操作员：" + sender.getName());
                     break;
                 case "del":
                 case "remove":
@@ -66,7 +66,7 @@ public class WhiteListCommand extends Command {
                         plugin.getWhiteListManager().removeWhiteList(uuid);
                         sender.sendMessages(ChatColor.GREEN + "[广播]白名单删除：" + args[1] + " # " + uuid);
                         plugin.getLogger().info(ChatColor.GREEN + "白名单删除成功：" + args[1] + " # " + uuid + ", 操作员：" + sender.getName());
-                        Util.broadcastToAdmins(ChatColor.GREEN + "白名单删除成功：" + args[1] + ", 操作员：" + sender.getName());
+                        Util.broadcast(ChatColor.GREEN + "白名单删除成功：" + args[1] + ", 操作员：" + sender.getName());
                     } else {
                         sender.sendMessages(ChatColor.RED + "玩家不在白名单中：" + args[1] + " # " + uuid);
                     }

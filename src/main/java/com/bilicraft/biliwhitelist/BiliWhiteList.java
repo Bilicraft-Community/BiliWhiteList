@@ -4,6 +4,7 @@ import com.bilicraft.biliwhitelist.manager.HistoryManager;
 import com.bilicraft.biliwhitelist.manager.WhiteListManager;
 import lombok.Getter;
 import lombok.SneakyThrows;
+import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.config.ListenerInfo;
@@ -136,6 +137,7 @@ public final class BiliWhiteList extends Plugin implements Listener {
         String forcedHost = getForcedHost(event.getConnection().getVirtualHost().getHostString());
         if (getConfig().getStringList("excludes").contains(forcedHost)) {
             getLogger().info("玩家 " + event.getConnection().getName() + " # " + event.getConnection().getUniqueId() + " 例外列表放行： " + forcedHost);
+            Util.broadcast(ChatColor.GRAY+"无白名单玩家 "+event.getConnection().getName()+" 正在加入豁免服务器: "+forcedHost);
             return;
         }
         if (!whiteListManager.isAllowed(playerUniqueId)) {

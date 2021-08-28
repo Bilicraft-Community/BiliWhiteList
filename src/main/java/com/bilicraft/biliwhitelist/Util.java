@@ -4,7 +4,7 @@ import net.md_5.bungee.api.ProxyServer;
 
 public class Util {
 
-    public static void broadcastToAdmins(String content){
+    public static void broadcast(String content){
         //BiliWhiteList.instance.getProxy().getPlayers().stream().filter(p->p.hasPermission("biliwhitelist.admin")).forEach(p->p.sendMessage(content));
         ProxyServer.getInstance().broadcast(content);
     }

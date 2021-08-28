@@ -65,7 +65,7 @@ public class InviteCommand extends Command {
                 plugin.getWhiteListManager().addWhiteList(invited);
                 sender.sendMessage(ChatColor.GREEN + "邀请成功");
                 plugin.getLogger().info("玩家 " + sender.getName() + " 邀请了 " + args[0]);
-                Util.broadcastToAdmins("玩家 " + sender.getName() + " 邀请了 " + args[0]);
+                Util.broadcast("玩家 " + sender.getName() + " 邀请了 " + args[0]);
             } catch (IOException | InterruptedException exception) {
                 sender.sendMessages(ChatColor.RED+"网络错误，请稍后重试。错误代码："+ChatColor.GRAY+exception.getMessage());
             }
