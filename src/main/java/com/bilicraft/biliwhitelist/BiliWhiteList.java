@@ -18,6 +18,8 @@ import net.md_5.bungee.config.YamlConfiguration;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
 import org.enginehub.squirrelid.Profile;
+import org.enginehub.squirrelid.cache.HashMapCache;
+import org.enginehub.squirrelid.cache.ProfileCache;
 import org.enginehub.squirrelid.cache.SQLiteCache;
 import org.enginehub.squirrelid.resolver.CacheForwardingService;
 import org.enginehub.squirrelid.resolver.HttpRepositoryService;
@@ -34,7 +36,7 @@ public final class BiliWhiteList extends Plugin implements Listener {
     public static BiliWhiteList instance;
     @Getter
     private CacheForwardingService resolver;
-    private SQLiteCache cache;
+    private ProfileCache cache;
     private Configuration config;
     @Getter
     private final HistoryManager historyManager = new HistoryManager(this);
@@ -63,7 +65,11 @@ public final class BiliWhiteList extends Plugin implements Listener {
         }
         saveDefaultConfig();
         // 初始化NameMapping
-        this.cache = new SQLiteCache(new File(getDataFolder(),"cache.db"));
+        try {
+            this.cache = new SQLiteCache(new File(getDataFolder(), "cache.db"));
+        }catch (Throwable th){
+            this.cache = new HashMapCache();
+        }
         //this.cache = new HashMapCache();
         this.resolver = new CacheForwardingService(HttpRepositoryService.forMinecraft(), cache);
         ProxyServer.getInstance().getPluginManager().registerCommand(this, new WhiteListCommand(this,"whitelist", "whitelist.admin"));
