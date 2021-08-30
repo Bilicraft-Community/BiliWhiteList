@@ -80,5 +80,4 @@ public class WhiteListManager {
         whiteListConfig.getStringList("blocklist").forEach(player -> builder.append(player).append(", "));
         return builder.toString();
     }
-
 }
