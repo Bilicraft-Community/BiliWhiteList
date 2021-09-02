@@ -61,6 +61,10 @@ public class InviteCommand extends Command {
                     sender.sendMessages(ChatColor.RED + "您所邀请的玩家已被管理组回绝，无法邀请");
                     return;
                 }
+                if(!plugin.getWhiteListManager().isAllowed(((ProxiedPlayer) sender).getUniqueId())){
+                    sender.sendMessages(ChatColor.RED + "在邀请其他人之前，您需要先通过白名单认证");
+                    return;
+                }
                 plugin.getHistoryManager().record(((ProxiedPlayer) sender).getUniqueId(), invited);
                 plugin.getWhiteListManager().addWhiteList(invited);
                 sender.sendMessage(ChatColor.GREEN + "邀请成功");
