@@ -37,8 +37,8 @@ public class InviteCommand extends Command {
             return;
         }
         if (args.length == 1) {
-            sender.sendMessage(ChatColor.AQUA + "您正在邀请玩家 " + ChatColor.YELLOW + ChatColor.AQUA + args[0] + " 加入 Bilicraft");
-            sender.sendMessage(ChatColor.AQUA + "邀请成功后，您邀请的玩家将会自动获得 Bilicraft 白名单");
+            sender.sendMessage(ChatColor.AQUA + "您正在邀请玩家 " + ChatColor.YELLOW + ChatColor.AQUA + args[0] + " 加入服务器");
+            sender.sendMessage(ChatColor.AQUA + "邀请成功后，您邀请的玩家将会自动获得白名单");
             sender.sendMessage(ChatColor.YELLOW + "注意：如果您邀请的玩家发生了违规行为，您将会承担连带责任");
             sender.sendMessage(ChatColor.GREEN + "确认邀请请输入 " + ChatColor.GOLD + "/invite " + args[0] + " confirm");
             return;

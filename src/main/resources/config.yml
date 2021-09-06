@@ -1,2 +1,5 @@
+messages:
+  no-whitelist: 抱歉，您没有此服务器的白名单，请先申请
+  no-whitelist-switch: 抱歉，您没有白名单，无法连接到 {server} 服务器，请先申请
 excludes:
 - act

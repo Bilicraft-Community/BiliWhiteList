@@ -124,7 +124,7 @@ public final class BiliWhiteList extends Plugin implements Listener {
         UUID playerUniqueId = event.getPlayer().getUniqueId();
         if (!whiteListManager.isAllowed(playerUniqueId)) {
             event.setCancelled(true);
-            event.getPlayer().sendMessage(TextComponent.fromLegacyText("您不在 Bilicraft 白名单中，无法连接到 " + event.getTarget().getName() + " 服务器。请申请白名单或联系其他玩家邀请。"));
+            event.getPlayer().sendMessage(TextComponent.fromLegacyText(getConfig().getString("messages.no-whitelist-switch").replace("{server}", event.getTarget().getName())));
         } else {
             getLogger().info("玩家 " + event.getPlayer().getName() + " # " + event.getPlayer().getUniqueId() + " 白名单放行： " + event.getTarget().getName());
         }
@@ -135,7 +135,7 @@ public final class BiliWhiteList extends Plugin implements Listener {
         UUID playerUniqueId = event.getConnection().getUniqueId();
         if (playerUniqueId == null) {
             event.setCancelled(true);
-            event.setCancelReason(TextComponent.fromLegacyText("Bilicraft 是正版服务器，请使用正版 Minecraft 账号登录"));
+            event.setCancelReason(TextComponent.fromLegacyText("请使用正版 Minecraft 账号登录"));
             getLogger().info("玩家 " + event.getConnection().getName() + " # " + event.getConnection().getUniqueId() + " 不是正版 Minecraft 账号，已拒绝");
             return;
         }
@@ -149,7 +149,7 @@ public final class BiliWhiteList extends Plugin implements Listener {
         }
         if (!whiteListManager.isAllowed(playerUniqueId)) {
             event.setCancelled(true);
-            event.setCancelReason(TextComponent.fromLegacyText("您不在 Bilicraft 白名单中，请申请白名单或联系其他玩家邀请"));
+            event.setCancelReason(TextComponent.fromLegacyText(getConfig().getString("messages.no-whitelist")));
             getLogger().info("玩家 " + event.getConnection().getName() + " # " + event.getConnection().getUniqueId() + " 没有白名单，已拒绝");
         } else {
             getLogger().info("玩家 " + event.getConnection().getName() + " # " + event.getConnection().getUniqueId() + " 白名单放行");
