@@ -19,6 +19,7 @@ public class HistoryManager {
     @SneakyThrows
     public HistoryManager(BiliWhiteList plugin){
         this.plugin = plugin;
+        if(!plugin.getDataFolder().exists()) plugin.getDataFolder().mkdirs();
         this.historyFile = new File(plugin.getDataFolder(), "history.yml");
         if(!historyFile.exists()) historyFile.createNewFile();
         this.historyConfig = ConfigurationProvider.getProvider(YamlConfiguration.class).load(historyFile);

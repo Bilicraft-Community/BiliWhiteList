@@ -1,6 +1,7 @@
 package com.bilicraft.biliwhitelist;
 
 import com.bilicraft.biliwhitelist.manager.HistoryManager;
+import com.bilicraft.biliwhitelist.manager.SilentBanManager;
 import com.bilicraft.biliwhitelist.manager.WhiteListManager;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -8,6 +9,7 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.config.ListenerInfo;
+import net.md_5.bungee.api.connection.PendingConnection;
 import net.md_5.bungee.api.event.LoginEvent;
 import net.md_5.bungee.api.event.ServerConnectEvent;
 import net.md_5.bungee.api.plugin.Listener;
@@ -17,6 +19,7 @@ import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
+import net.md_5.bungee.netty.ChannelWrapper;
 import org.enginehub.squirrelid.Profile;
 import org.enginehub.squirrelid.cache.HashMapCache;
 import org.enginehub.squirrelid.cache.ProfileCache;
@@ -27,10 +30,12 @@ import org.enginehub.squirrelid.resolver.HttpRepositoryService;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Level;
 
 public final class BiliWhiteList extends Plugin implements Listener {
     public static BiliWhiteList instance;
@@ -42,6 +47,8 @@ public final class BiliWhiteList extends Plugin implements Listener {
     private final HistoryManager historyManager = new HistoryManager(this);
     @Getter
     private final WhiteListManager whiteListManager = new WhiteListManager(this);
+    @Getter
+    private final SilentBanManager silentBanManager = new SilentBanManager(this);
 
     @Override
     public void onLoad() {
@@ -122,6 +129,14 @@ public final class BiliWhiteList extends Plugin implements Listener {
             return;
         }
         UUID playerUniqueId = event.getPlayer().getUniqueId();
+
+        // 静默封禁检查
+        if(silentBanManager.isSilentBanned(event.getPlayer().getPendingConnection().getUniqueId())){
+            getLogger().info("玩家 " + event.getPlayer().getName() + " # " +event.getPlayer().getUniqueId() + " 已被静默封禁");
+            disconnectConnection(event.getPlayer().getPendingConnection());
+            return;
+        }
+
         if (!whiteListManager.isAllowed(playerUniqueId)) {
             event.setCancelled(true);
             event.getPlayer().sendMessage(TextComponent.fromLegacyText(getConfig().getString("messages.no-whitelist-switch").replace("{server}", event.getTarget().getName())));
@@ -133,6 +148,7 @@ public final class BiliWhiteList extends Plugin implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onJoin(LoginEvent event) {
         UUID playerUniqueId = event.getConnection().getUniqueId();
+
         if (playerUniqueId == null) {
             event.setCancelled(true);
             event.setCancelReason(TextComponent.fromLegacyText("请使用正版 Minecraft 账号登录"));
@@ -140,6 +156,14 @@ public final class BiliWhiteList extends Plugin implements Listener {
             return;
         }
         this.cache.put(new Profile(playerUniqueId,event.getConnection().getName()));
+
+        // 静默封禁检查
+        if(silentBanManager.isSilentBanned(event.getConnection().getUniqueId())){
+            getLogger().info("玩家 " + event.getConnection().getName() + " # " + event.getConnection().getUniqueId() + " 已被静默封禁");
+            disconnectConnection(event.getConnection());
+            return;
+        }
+
         String forcedHost = getForcedHost(event.getConnection().getVirtualHost().getHostString());
         if (getConfig().getStringList("excludes").contains(forcedHost)) {
             getLogger().info("玩家 " + event.getConnection().getName() + " # " + event.getConnection().getUniqueId() + " 例外列表放行： " + forcedHost);
@@ -153,6 +177,17 @@ public final class BiliWhiteList extends Plugin implements Listener {
             getLogger().info("玩家 " + event.getConnection().getName() + " # " + event.getConnection().getUniqueId() + " 没有白名单，已拒绝");
         } else {
             getLogger().info("玩家 " + event.getConnection().getName() + " # " + event.getConnection().getUniqueId() + " 白名单放行");
+        }
+
+    }
+    private void disconnectConnection(PendingConnection pendingConnection){
+        try {
+            Field ch = pendingConnection.getClass().getDeclaredField("ch");
+            ch.setAccessible(true);
+            ((ChannelWrapper)ch.get(pendingConnection)).close(); // 掐掉连接
+        }catch (Exception e){
+            getLogger().log(Level.WARNING,"静默封禁失败，模拟假超时消息",e);
+            pendingConnection.disconnect(TextComponent.fromLegacyText("Timed out"));
         }
     }
 }
