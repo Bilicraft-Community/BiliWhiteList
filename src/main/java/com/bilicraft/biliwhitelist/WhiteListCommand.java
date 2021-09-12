@@ -37,7 +37,7 @@ public class WhiteListCommand extends Command {
             return;
         }
         if (args.length < 2) {
-            sender.sendMessage(ChatColor.RED + "参数错误: /whitelist <add/remove/list/query> [name/uuid]; 由于偷懒，请使用/whitelist list的时候后面也跟一个有效玩家游戏用户名");
+            sender.sendMessage(ChatColor.RED + "参数错误: /whitelist <add/remove/list/query/silentban/unsilentban> [name/uuid]; 由于偷懒，请使用/whitelist list的时候后面也跟一个有效玩家游戏用户名");
             return;
         }
         sender.sendMessage(ChatColor.BLUE + "正在处理...");
