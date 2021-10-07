@@ -17,3 +17,5 @@ BilicraftWhiteList 的BC版本
 * /whitelist list <random player> - 输出所有白名单玩家列表
 * /whitelist block <player> - 回绝特定玩家
 * /whitelist unblock <player> - 取消回绝特定玩家
+* /whitelist silentban <player> - 静默封禁指定玩家，被静默封禁的玩家尝试连接服务器的时候，连接将被强制掐断，玩家只能看到连接错误，而不是封禁信息
+* /whitelist unsilentban <player> - 取消静默封禁指定玩家

@@ -18,6 +18,7 @@ public class WhiteListManager {
     @SneakyThrows
     public WhiteListManager(BiliWhiteList plugin) {
         this.plugin = plugin;
+        if(!plugin.getDataFolder().exists()) plugin.getDataFolder().mkdirs();
         this.whiteListFile = new File(plugin.getDataFolder(), "whitelist.yml");
         if (!whiteListFile.exists()) whiteListFile.createNewFile();
         this.whiteListConfig = ConfigurationProvider.getProvider(YamlConfiguration.class).load(whiteListFile);
