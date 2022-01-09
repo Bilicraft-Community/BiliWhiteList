@@ -72,10 +72,10 @@ public final class BiliWhiteList extends Plugin implements Listener {
         }
         //this.cache = new HashMapCache();
         this.resolver = new CacheForwardingService(HttpRepositoryService.forMinecraft(), cache);
-        ProxyServer.getInstance().getPluginManager().registerCommand(this, new WhiteListCommand(this,"whitelist", "whitelist.admin"));
-        ProxyServer.getInstance().getPluginManager().registerCommand(this, new InviteCommand(this,"invite"));
-        ProxyServer.getInstance().getPluginManager().registerCommand(this, new WhoInviteCommand(this,"whoinvite"));
-        ProxyServer.getInstance().getPluginManager().registerCommand(this, new InviteListCommand(this,"invitelist"));
+        ProxyServer.getInstance().getPluginManager().registerCommand(this, new WhiteListCommand(this,"bcwhitelist", "whitelist.admin"));
+        ProxyServer.getInstance().getPluginManager().registerCommand(this, new InviteCommand(this,"bcinvite"));
+        ProxyServer.getInstance().getPluginManager().registerCommand(this, new WhoInviteCommand(this,"bcwhoinvite"));
+        ProxyServer.getInstance().getPluginManager().registerCommand(this, new InviteListCommand(this,"bcinvitelist"));
         ProxyServer.getInstance().getPluginManager().registerListener(this, this);
         getProxy().getPlayers().forEach(player-> cache.put(new Profile(player.getUniqueId(),player.getName())));
     }
@@ -146,9 +146,9 @@ public final class BiliWhiteList extends Plugin implements Listener {
         String forcedHost = getForcedHost(event.getConnection().getVirtualHost().getHostString());
         if (getConfig().getStringList("excludes").contains(forcedHost)) {
             getLogger().info("玩家 " + event.getConnection().getName() + " # " + event.getConnection().getUniqueId() + " 例外列表放行： " + forcedHost);
-            if(!whiteListManager.isAllowed(playerUniqueId)) {
-                Util.broadcast(ChatColor.GRAY+"无白名单玩家 "+event.getConnection().getName()+" 正在加入豁免服务器: "+forcedHost);
-            }
+//            if(!whiteListManager.isAllowed(playerUniqueId)) {
+//                Util.broadcast(ChatColor.GRAY+"无白名单玩家 "+event.getConnection().getName()+" 正在加入豁免服务器: "+forcedHost);
+//            }
             return;
         }
         if (!whiteListManager.isAllowed(playerUniqueId)) {

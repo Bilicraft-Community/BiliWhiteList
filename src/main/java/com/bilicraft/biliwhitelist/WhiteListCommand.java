@@ -37,7 +37,7 @@ public class WhiteListCommand extends Command {
             return;
         }
         if (args.length < 2) {
-            sender.sendMessage(ChatColor.RED + "参数错误: /whitelist <add/remove/list/query/silentban/unsilentban> [name/uuid]; 由于偷懒，请使用/whitelist list的时候后面也跟一个有效玩家游戏用户名");
+            sender.sendMessage(ChatColor.RED + "参数错误: /bcwhitelist <add/remove/list/query/silentban/unsilentban> [name/uuid]; 由于偷懒，请使用/whitelist list的时候后面也跟一个有效玩家游戏用户名");
             return;
         }
         sender.sendMessage(ChatColor.BLUE + "正在处理...");
@@ -75,10 +75,10 @@ public class WhiteListCommand extends Command {
                     sender.sendMessage(ChatColor.GREEN + "白名单玩家：" + plugin.getWhiteListManager().formatAllInWhiteList());
                     break;
                 case "query":
-                    if(plugin.getSilentBanManager().isSilentBanned(uuid)){
-                        sender.sendMessages(ChatColor.GREEN + "该玩家白名单状态：已被静默封禁");
-                        return;
-                    }
+//                    if(plugin.getSilentBanManager().isSilentBanned(uuid)){
+//                        sender.sendMessages(ChatColor.GREEN + "该玩家白名单状态：已被静默封禁");
+//                        return;
+//                    }
                     if (plugin.getWhiteListManager().isBlocked(uuid)) {
                         sender.sendMessages(ChatColor.GREEN + "该玩家白名单状态：回绝");
                         return;
@@ -114,22 +114,22 @@ public class WhiteListCommand extends Command {
                     plugin.getWhiteListManager().removeBlockList(uuid);
                     sender.sendMessages(ChatColor.GREEN + "移除成功：" + args[1] + " 的回绝操作已被撤销");
                     break;
-                case "silentban":
-                    if(plugin.getSilentBanManager().isSilentBanned(uuid)){
-                        sender.sendMessages(ChatColor.RED + "封禁失败：" + args[1] + " 已被静默封禁");
-                        return;
-                    }
-                    plugin.getSilentBanManager().silentBan(uuid);
-                    sender.sendMessages(ChatColor.GREEN + "封禁成功：" + args[1] + " 现已静默封禁");
-                    break;
-                case "unsilentban":
-                    if(!plugin.getSilentBanManager().isSilentBanned(uuid)){
-                        sender.sendMessages(ChatColor.RED + "解封失败：" + args[1] + " 未被静默封禁");
-                        return;
-                    }
-                    plugin.getSilentBanManager().unSilentBan(uuid);
-                    sender.sendMessages(ChatColor.GREEN + "解封成功：" + args[1] + " 现已解除静默封禁");
-                    break;
+//                case "silentban":
+//                    if(plugin.getSilentBanManager().isSilentBanned(uuid)){
+//                        sender.sendMessages(ChatColor.RED + "封禁失败：" + args[1] + " 已被静默封禁");
+//                        return;
+//                    }
+//                    plugin.getSilentBanManager().silentBan(uuid);
+//                    sender.sendMessages(ChatColor.GREEN + "封禁成功：" + args[1] + " 现已静默封禁");
+//                    break;
+//                case "unsilentban":
+//                    if(!plugin.getSilentBanManager().isSilentBanned(uuid)){
+//                        sender.sendMessages(ChatColor.RED + "解封失败：" + args[1] + " 未被静默封禁");
+//                        return;
+//                    }
+//                    plugin.getSilentBanManager().unSilentBan(uuid);
+//                    sender.sendMessages(ChatColor.GREEN + "解封成功：" + args[1] + " 现已解除静默封禁");
+//                    break;
                 default:
                     sender.sendMessage(ChatColor.RED + "参数有误");
             }

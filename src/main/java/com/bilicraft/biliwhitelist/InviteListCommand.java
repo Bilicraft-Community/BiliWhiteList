@@ -30,7 +30,7 @@ public class InviteListCommand extends Command {
     @Override
     public void execute(CommandSender sender, String[] args) {
         if (args.length != 1) {
-            sender.sendMessage(ChatColor.RED + "用法: /invitelist <玩家ID>");
+            sender.sendMessage(ChatColor.RED + "用法: /bcinvitelist <玩家ID>");
             return;
         }
         sender.sendMessage(ChatColor.BLUE + "正在查询，请稍后（这可能需要很长一段时间）...");
