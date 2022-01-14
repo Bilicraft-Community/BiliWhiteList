@@ -1,5 +1,6 @@
 package com.bilicraft.biliwhitelist;
 
+import com.bilicraft.biliwhitelist.manager.WhiteListManager;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.plugin.Command;
@@ -8,6 +9,7 @@ import org.enginehub.squirrelid.Profile;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class InviteListCommand extends Command {
     private final BiliWhiteList plugin;
@@ -42,7 +44,7 @@ public class InviteListCommand extends Command {
                 return;
             }
 
-            List<UUID> inviteds = plugin.getHistoryManager().getInvited(profile.getUniqueId());
+            List<UUID> inviteds = plugin.getWhiteListManager().queryRecords().stream().map(WhiteListManager.QueryResult::getInviter).collect(Collectors.toList());
 
             for (UUID invited : inviteds) {
                 try {

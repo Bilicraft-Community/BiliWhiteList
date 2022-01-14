@@ -1,13 +1,19 @@
 package com.bilicraft.biliwhitelist;
 
+import com.bilicraft.biliwhitelist.manager.WhiteListManager;
+import com.google.common.collect.ImmutableList;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.plugin.Command;
 import org.enginehub.squirrelid.Profile;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.StringJoiner;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
+@SuppressWarnings("deprecation")
 public class WhiteListCommand extends Command {
     private final BiliWhiteList plugin;
 
@@ -51,85 +57,78 @@ public class WhiteListCommand extends Command {
             UUID uuid = profile.getUniqueId();
             switch (args[0]) {
                 case "add":
-                    if (plugin.getWhiteListManager().isBlocked(uuid)) {
-                        sender.sendMessages(ChatColor.RED + "添加失败：" + args[1] + " 位于回绝名单中");
-                        return;
+                    switch (plugin.getWhiteListManager().checkWhiteList(uuid)){
+                        case BLOCKED:
+                            sender.sendMessages(ChatColor.RED + "添加失败：" + args[1] + " 位于回绝名单中");
+                            return;
+                        case WHITELISTED:
+                            sender.sendMessages(ChatColor.YELLOW + "添加失败：" + args[1] + " 已在白名单中");
+                            return;
+                        case NO_RECORD:
+                            plugin.getWhiteListManager().addWhite(uuid,new UUID(0,0));
+                            sender.sendMessages(ChatColor.GREEN + "添加成功：" + args[1] + " # " + uuid);
+                            plugin.getLogger().info(ChatColor.GREEN + "白名单添加成功：" + args[1] + " # " + uuid + ", 操作员：" + sender.getName());
+                            return;
                     }
-                    plugin.getWhiteListManager().addWhiteList(uuid);
-                    sender.sendMessages(ChatColor.GREEN + "添加成功：" + args[1] + " # " + uuid);
-                    plugin.getLogger().info(ChatColor.GREEN + "白名单添加成功：" + args[1] + " # " + uuid + ", 操作员：" + sender.getName());
-                    Util.broadcast(ChatColor.GREEN + "[广播]白名单添加：" + args[1] + ", 操作员：" + sender.getName());
                     break;
                 case "del":
                 case "remove":
-                    if (plugin.getWhiteListManager().isWhiteListed(uuid)) {
-                        plugin.getWhiteListManager().removeWhiteList(uuid);
-                        sender.sendMessages(ChatColor.GREEN + "[广播]白名单删除：" + args[1] + " # " + uuid);
-                        plugin.getLogger().info(ChatColor.GREEN + "白名单删除成功：" + args[1] + " # " + uuid + ", 操作员：" + sender.getName());
-                        Util.broadcast(ChatColor.GREEN + "白名单删除成功：" + args[1] + ", 操作员：" + sender.getName());
-                    } else {
-                        sender.sendMessages(ChatColor.RED + "玩家不在白名单中：" + args[1] + " # " + uuid);
+                    switch (plugin.getWhiteListManager().checkWhiteList(uuid)){
+                        case NO_RECORD:
+                            sender.sendMessages(ChatColor.RED + "删除失败：" + args[1] + " 不在白名单或者回绝列表中");
+                            return;
+                        case WHITELISTED:
+                            plugin.getWhiteListManager().removeWhite(uuid);
+                            plugin.getLogger().info(ChatColor.GREEN + "白名单删除成功：" + args[1] + " # " + uuid + ", 操作员：" + sender.getName());
+                            sender.sendMessages(ChatColor.GREEN + "白名单删除：" + args[1] + " # " + uuid);
+                            return;
+                        case BLOCKED:
+                            plugin.getWhiteListManager().removeWhite(uuid);
+                            plugin.getLogger().info(ChatColor.YELLOW+ "回绝删除成功，如有需要，请重新添加白名单：" + args[1] + " # " + uuid + ", 操作员：" + sender.getName());
+                            sender.sendMessages(ChatColor.YELLOW + "回绝删除：" + args[1] + " # " + uuid);
+                            return;
                     }
                     break;
                 case "list":
-                    sender.sendMessage(ChatColor.GREEN + "白名单玩家：" + plugin.getWhiteListManager().formatAllInWhiteList());
+                    StringJoiner builder = new StringJoiner(",","","");
+                    sender.sendMessage(ChatColor.BLUE + "请稍等，这可能需要一会儿...");
+                    List<UUID> queryResultList = plugin.getWhiteListManager().queryRecords().stream().map(
+                            WhiteListManager.QueryResult::getUuid
+                    ).collect(Collectors.toList());
+                    ImmutableList<Profile> queryList =   plugin.getResolver().findAllByUuid(queryResultList);
+                    for (Profile pro : queryList) {
+                        builder.add(pro.getName());
+                    }
+                    sender.sendMessage(ChatColor.GREEN + "白名单玩家：" + builder);
                     break;
                 case "query":
-//                    if(plugin.getSilentBanManager().isSilentBanned(uuid)){
-//                        sender.sendMessages(ChatColor.GREEN + "该玩家白名单状态：已被静默封禁");
-//                        return;
-//                    }
-                    if (plugin.getWhiteListManager().isBlocked(uuid)) {
-                        sender.sendMessages(ChatColor.GREEN + "该玩家白名单状态：回绝");
-                        return;
-                    }
-                    if (!plugin.getWhiteListManager().isWhiteListed(uuid)) {
-                        sender.sendMessage(ChatColor.GREEN + "该玩家白名单状态：无白名单");
-                        break;
-                    }
-                    if (plugin.getHistoryManager().getInviter(uuid).isPresent()) {
-                        sender.sendMessage(ChatColor.GREEN + "该玩家白名单状态：有白名单 (邀请进入)");
-                    } else {
-                        sender.sendMessage(ChatColor.GREEN + "该玩家白名单状态：有白名单 (管理添加)");
+                    switch (plugin.getWhiteListManager().checkWhiteList(uuid)){
+                        case BLOCKED:
+                            sender.sendMessage(ChatColor.RED+"目标玩家处于回绝名单中，无法进入内服，且无法再添加他的白名单");
+                            return;
+                        case WHITELISTED:
+                            sender.sendMessage(ChatColor.GREEN+"目标玩家处于白名单中，可进入内服");
+                            return;
+                        case NO_RECORD:
+                            sender.sendMessage(ChatColor.YELLOW+"目标玩家不在任何名单中，只能进入外服");
+                            return;
                     }
                     break;
                 case "block":
-                    if (plugin.getWhiteListManager().isBlocked(uuid)) {
-                        sender.sendMessages(ChatColor.RED + "添加失败：" + args[1] + " 已位于回绝名单中");
-                        return;
+                    switch (plugin.getWhiteListManager().checkWhiteList(uuid)){
+                        case BLOCKED:
+                            sender.sendMessage(ChatColor.RED+"目标玩家已处于回绝名单中");
+                            return;
+                        case NO_RECORD:
+                        case WHITELISTED:
+                            plugin.getWhiteListManager().setBlock(uuid,true);
+                            sender.sendMessage(ChatColor.GREEN+"成功设置目标玩家状态为回绝");
+                            return;
                     }
-                    plugin.getWhiteListManager().addBlockList(uuid);
-                    if (plugin.getWhiteListManager().isWhiteListed(uuid)) {
-                        plugin.getWhiteListManager().removeWhiteList(uuid);
-                        sender.sendMessages(ChatColor.YELLOW + "撤销：" + args[1] + " 发现现存白名单，已撤销");
-                    }
-                    sender.sendMessages(ChatColor.GREEN + "添加成功：" + args[1] + " 现已被回绝");
-                    plugin.getLogger().info(ChatColor.GREEN + "回绝：" + args[1] + " # " + uuid + ", 操作员：" + sender.getName());
                     break;
                 case "unblock":
-                    if (!plugin.getWhiteListManager().isBlocked(uuid)) {
-                        sender.sendMessages(ChatColor.RED + "移除失败：" + args[1] + " 没有位于回绝名单中");
-                        return;
-                    }
-                    plugin.getWhiteListManager().removeBlockList(uuid);
-                    sender.sendMessages(ChatColor.GREEN + "移除成功：" + args[1] + " 的回绝操作已被撤销");
+                    sender.sendMessages(ChatColor.LIGHT_PURPLE + "该命令不再可用，请使用/bcwhitelist remove代替");
                     break;
-//                case "silentban":
-//                    if(plugin.getSilentBanManager().isSilentBanned(uuid)){
-//                        sender.sendMessages(ChatColor.RED + "封禁失败：" + args[1] + " 已被静默封禁");
-//                        return;
-//                    }
-//                    plugin.getSilentBanManager().silentBan(uuid);
-//                    sender.sendMessages(ChatColor.GREEN + "封禁成功：" + args[1] + " 现已静默封禁");
-//                    break;
-//                case "unsilentban":
-//                    if(!plugin.getSilentBanManager().isSilentBanned(uuid)){
-//                        sender.sendMessages(ChatColor.RED + "解封失败：" + args[1] + " 未被静默封禁");
-//                        return;
-//                    }
-//                    plugin.getSilentBanManager().unSilentBan(uuid);
-//                    sender.sendMessages(ChatColor.GREEN + "解封成功：" + args[1] + " 现已解除静默封禁");
-//                    break;
                 default:
                     sender.sendMessage(ChatColor.RED + "参数有误");
             }

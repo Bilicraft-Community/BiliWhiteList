@@ -1,5 +1,6 @@
 package com.bilicraft.biliwhitelist;
 
+import com.bilicraft.biliwhitelist.manager.WhiteListManager;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -8,6 +9,7 @@ import org.enginehub.squirrelid.Profile;
 
 import java.io.IOException;
 import java.util.UUID;
+@SuppressWarnings("deprecation")
 public class InviteCommand extends Command {
     private final BiliWhiteList plugin;
     /**
@@ -53,23 +55,27 @@ public class InviteCommand extends Command {
                     return;
                 }
                 UUID invited = profile.getUniqueId();
-                if(plugin.getWhiteListManager().isWhiteListed(invited)) {
-                    sender.sendMessages(ChatColor.RED + "您所邀请的玩家当前已在白名单中，无需重复邀请");
+                UUID inviter = ((ProxiedPlayer) sender).getUniqueId();
+
+                if(plugin.getWhiteListManager().checkWhiteList(inviter) != WhiteListManager.RecordStatus.WHITELISTED){
+                    sender.sendMessages(ChatColor.RED + "在邀请其他人之前，您需要先通过白名单认证！");
                     return;
                 }
-                if(plugin.getWhiteListManager().isBlocked(invited)){
-                    sender.sendMessages(ChatColor.RED + "您所邀请的玩家已被管理组回绝，无法邀请");
-                    return;
+
+                switch (plugin.getWhiteListManager().checkWhiteList(invited)){
+                    case BLOCKED:
+                        sender.sendMessages(ChatColor.RED + "您所邀请的玩家已被管理组回绝，无法邀请");
+                        return;
+                    case WHITELISTED:
+                        sender.sendMessages(ChatColor.RED + "您所邀请的玩家当前已在白名单中，无需重复邀请");
+                        return;
+                    case NO_RECORD:
+                        plugin.getWhiteListManager().addWhite(invited,inviter);
+                        sender.sendMessage(ChatColor.GREEN + "邀请成功");
+                        plugin.getLogger().info("玩家 " + sender.getName() + " 邀请了 " + args[0]);
+                        Util.broadcast("玩家 " + sender.getName() + " 邀请了 " + args[0]);
+                        break;
                 }
-                if(!plugin.getWhiteListManager().isAllowed(((ProxiedPlayer) sender).getUniqueId())){
-                    sender.sendMessages(ChatColor.RED + "在邀请其他人之前，您需要先通过白名单认证");
-                    return;
-                }
-                plugin.getHistoryManager().record(((ProxiedPlayer) sender).getUniqueId(), invited);
-                plugin.getWhiteListManager().addWhiteList(invited);
-                sender.sendMessage(ChatColor.GREEN + "邀请成功");
-                plugin.getLogger().info("玩家 " + sender.getName() + " 邀请了 " + args[0]);
-                Util.broadcast("玩家 " + sender.getName() + " 邀请了 " + args[0]);
             } catch (IOException | InterruptedException exception) {
                 sender.sendMessages(ChatColor.RED+"网络错误，请稍后重试。错误代码："+ChatColor.GRAY+exception.getMessage());
             }
