@@ -1,7 +1,5 @@
 package com.bilicraft.biliwhitelist;
 
-import com.bilicraft.biliwhitelist.database.DatabaseManager;
-import com.bilicraft.biliwhitelist.database.MySQLCore;
 import com.bilicraft.biliwhitelist.manager.WhiteListManager;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -41,7 +39,7 @@ public final class BiliWhiteList extends Plugin implements Listener {
     @Getter
     private  WhiteListManager whiteListManager ;
     @Getter
-    private DatabaseManager databaseManager;
+    private BiliDatabase databaseManager;
 
     @Override
     public void onLoad() {
@@ -70,25 +68,24 @@ public final class BiliWhiteList extends Plugin implements Listener {
         }
         saveDefaultConfig();
         // 初始化NameMapping
-        try {
-            this.cache = new SQLiteCache(new File(getDataFolder(), "cache.db"));
-        }catch (Throwable th){
+        try{
+            this.cache = new SQLiteCache(new File(getDataFolder(),"cache.db"));
+        }catch (Throwable throwable){
             this.cache = new HashMapCache();
-            getLogger().info("Failed to create SQLite caching, use HashMapCache instead.");
         }
-        this.resolver = new CacheForwardingService(HttpRepositoryService.forMinecraft(), cache);
 
+        this.resolver = new CacheForwardingService(HttpRepositoryService.forMinecraft(), cache);
         Configuration mysql = getConfig().getSection("mysql");
-        MySQLCore core = new MySQLCore(this,
+        this.databaseManager = new BiliDatabase(this,
                 mysql.getString("host"),
                 mysql.getString("user"),
                 mysql.getString("pass"),
                 mysql.getString("database"),
                 mysql.getInt("port"),
-                mysql.getBoolean("usessl")
-                );
-        this.databaseManager = new DatabaseManager(this,core);
+                mysql.getBoolean("usessl"));
         this.whiteListManager = new WhiteListManager(this);
+
+
         ProxyServer.getInstance().getPluginManager().registerCommand(this, new WhiteListCommand(this,"bcwhitelist", "whitelist.admin"));
         ProxyServer.getInstance().getPluginManager().registerCommand(this, new InviteCommand(this,"bcinvite"));
         ProxyServer.getInstance().getPluginManager().registerCommand(this, new WhoInviteCommand(this,"bcwhoinvite"));
@@ -96,6 +93,7 @@ public final class BiliWhiteList extends Plugin implements Listener {
         ProxyServer.getInstance().getPluginManager().registerCommand(this, new ServerMarkCommand(this,"bcservermark","whitelist.admin"));
         ProxyServer.getInstance().getPluginManager().registerListener(this, this);
         getProxy().getPlayers().forEach(player-> cache.put(new Profile(player.getUniqueId(),player.getName())));
+        getLogger().info("Finished!");
     }
 
     private Map<String, String> getForcedHosts() {
@@ -111,8 +109,6 @@ public final class BiliWhiteList extends Plugin implements Listener {
     private String getForcedHost(String virtualHost) { //Maybe null
         return getForcedHosts().get(virtualHost);
     }
-
-
 
     @Override
     public void onDisable() {
