@@ -1,10 +1,10 @@
 package com.bilicraft.biliwhitelist;
 
-import com.bilicraft.biliwhitelist.manager.HistoryManager;
+import com.bilicraft.biliwhitelist.database.DatabaseManager;
+import com.bilicraft.biliwhitelist.database.MySQLCore;
 import com.bilicraft.biliwhitelist.manager.WhiteListManager;
 import lombok.Getter;
 import lombok.SneakyThrows;
-import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.config.ListenerInfo;
@@ -39,9 +39,9 @@ public final class BiliWhiteList extends Plugin implements Listener {
     private ProfileCache cache;
     private Configuration config;
     @Getter
-    private final HistoryManager historyManager = new HistoryManager(this);
+    private  WhiteListManager whiteListManager ;
     @Getter
-    private final WhiteListManager whiteListManager = new WhiteListManager(this);
+    private DatabaseManager databaseManager;
 
     @Override
     public void onLoad() {
@@ -74,9 +74,22 @@ public final class BiliWhiteList extends Plugin implements Listener {
             this.cache = new SQLiteCache(new File(getDataFolder(), "cache.db"));
         }catch (Throwable th){
             this.cache = new HashMapCache();
+            getLogger().info("Failed to create SQLite caching, use HashMapCache instead.");
         }
-        //this.cache = new HashMapCache();
         this.resolver = new CacheForwardingService(HttpRepositoryService.forMinecraft(), cache);
+
+        Configuration mysql = getConfig().getSection("mysql");
+        MySQLCore core = new MySQLCore(this,
+                getConfig().getString("host"),
+                getConfig().getString("user"),
+                getConfig().getString("pass"),
+                getConfig().getString("database"),
+                getConfig().getInt("port"),
+                getConfig().getBoolean("usessl")
+                );
+        this.databaseManager = new DatabaseManager(this,core);
+        this.whiteListManager = new WhiteListManager(this);
+        // Should we create tables?
         ProxyServer.getInstance().getPluginManager().registerCommand(this, new ReloadCommand(this,"bcwhitelistreload"));
         ProxyServer.getInstance().getPluginManager().registerCommand(this, new WhiteListCommand(this,"bcwhitelist", "whitelist.admin"));
         ProxyServer.getInstance().getPluginManager().registerCommand(this, new InviteCommand(this,"bcinvite"));
@@ -128,9 +141,8 @@ public final class BiliWhiteList extends Plugin implements Listener {
             getLogger().info("玩家 " + event.getPlayer().getName() + " # " + event.getPlayer().getUniqueId() + " 例外列表放行： " + event.getTarget().getName());
             return;
         }
-        UUID playerUniqueId = event.getPlayer().getUniqueId();
-
-        if (!whiteListManager.isAllowed(playerUniqueId)) {
+        WhiteListManager.RecordStatus status = getWhiteListManager().checkWhiteList(event.getPlayer().getUniqueId());
+        if (status != WhiteListManager.RecordStatus.WHITELISTED) {
             event.setCancelled(true);
             event.getPlayer().sendMessage(TextComponent.fromLegacyText(getConfig().getString("messages.no-whitelist-switch").replace("{server}", event.getTarget().getName())));
         } else {
@@ -157,7 +169,8 @@ public final class BiliWhiteList extends Plugin implements Listener {
 //            }
             return;
         }
-        if (!whiteListManager.isAllowed(playerUniqueId)) {
+        WhiteListManager.RecordStatus status = getWhiteListManager().checkWhiteList(playerUniqueId);
+        if (status != WhiteListManager.RecordStatus.WHITELISTED) {
             event.setCancelled(true);
             event.setCancelReason(TextComponent.fromLegacyText(getConfig().getString("messages.no-whitelist")));
             getLogger().info("玩家 " + event.getConnection().getName() + " # " + event.getConnection().getUniqueId() + " 没有白名单，已拒绝");

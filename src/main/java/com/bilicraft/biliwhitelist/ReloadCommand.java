@@ -1,13 +1,7 @@
 package com.bilicraft.biliwhitelist;
 
-import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.plugin.Command;
-import org.enginehub.squirrelid.Profile;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.UUID;
 
 public class ReloadCommand extends Command {
     private final BiliWhiteList plugin;
@@ -29,7 +23,6 @@ public class ReloadCommand extends Command {
      */
     @Override
     public void execute(CommandSender sender, String[] args) {
-        plugin.getWhiteListManager().reload();
         plugin.reload();
         sender.sendMessage("Whitelist data has been reloaded.");
     }
