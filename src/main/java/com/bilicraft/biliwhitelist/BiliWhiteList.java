@@ -89,12 +89,11 @@ public final class BiliWhiteList extends Plugin implements Listener {
                 );
         this.databaseManager = new DatabaseManager(this,core);
         this.whiteListManager = new WhiteListManager(this);
-        // Should we create tables?
-        ProxyServer.getInstance().getPluginManager().registerCommand(this, new ReloadCommand(this,"bcwhitelistreload"));
         ProxyServer.getInstance().getPluginManager().registerCommand(this, new WhiteListCommand(this,"bcwhitelist", "whitelist.admin"));
         ProxyServer.getInstance().getPluginManager().registerCommand(this, new InviteCommand(this,"bcinvite"));
         ProxyServer.getInstance().getPluginManager().registerCommand(this, new WhoInviteCommand(this,"bcwhoinvite"));
         ProxyServer.getInstance().getPluginManager().registerCommand(this, new InviteListCommand(this,"bcinvitelist"));
+        ProxyServer.getInstance().getPluginManager().registerCommand(this, new ServerMarkCommand(this,"bcservermark","whitelist.admin"));
         ProxyServer.getInstance().getPluginManager().registerListener(this, this);
         getProxy().getPlayers().forEach(player-> cache.put(new Profile(player.getUniqueId(),player.getName())));
     }

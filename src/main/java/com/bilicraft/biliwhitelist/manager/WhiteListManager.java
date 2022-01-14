@@ -76,7 +76,7 @@ public class WhiteListManager {
     public List<QueryResult> queryRecords(){
         try(DatabaseConnection databaseConnection = plugin.getDatabaseManager().getConnection()) {
             Connection connection = databaseConnection.get();
-            PreparedStatement preparedStatement = connection.prepareStatement("SELECT FROM " + recordsTableName+" WHERE 1=1");
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM " + recordsTableName+" WHERE 1=1 LIMIT 1");
             ResultSet set = preparedStatement.executeQuery();
             List<QueryResult> results = new ArrayList<>();
             while(set.next()) {
@@ -135,7 +135,41 @@ public class WhiteListManager {
         }
     }
 
+    public boolean isSeverRequireWhiteList(@NotNull String server){
+        try(DatabaseConnection databaseConnection = plugin.getDatabaseManager().getConnection()) {
+            Connection connection = databaseConnection.get();
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM `"+ recordsTableName+"` WHERE server = ?");
+            preparedStatement.setString(1,server);
+            return preparedStatement.executeQuery().next();
+        }catch (SQLException exception){
+            exception.printStackTrace();
+            return false;
+        }
+    }
 
+    public boolean markServerRequireWhiteList(@NotNull String server){
+        try(DatabaseConnection databaseConnection = plugin.getDatabaseManager().getConnection()) {
+            Connection connection = databaseConnection.get();
+            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO  `"+ recordsTableName+"` (`id`,`server`) VALUES (?,?)");
+            preparedStatement.setInt(1,0);
+            preparedStatement.setString(2,server);
+            return preparedStatement.executeQuery().next();
+        }catch (SQLException exception){
+            exception.printStackTrace();
+            return false;
+        }
+    }
+    public boolean unmarkServerRequireWhiteList(@NotNull String server){
+        try(DatabaseConnection databaseConnection = plugin.getDatabaseManager().getConnection()) {
+            Connection connection = databaseConnection.get();
+            PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM `"+ recordsTableName+"` WHERE `server` = ?");
+            preparedStatement.setString(1,server);
+            return preparedStatement.execute();
+        }catch (SQLException exception){
+            exception.printStackTrace();
+            return false;
+        }
+    }
     public void addWhite(@NotNull UUID player, @NotNull UUID inviter) {
         if(checkWhiteList(player) != RecordStatus.NO_RECORD)
             return;
@@ -167,18 +201,6 @@ public class WhiteListManager {
             return RecordStatus.BLOCKED;
         return RecordStatus.WHITELISTED;
     }
-
-//    public String formatAllInWhiteList() {
-//        StringBuilder builder = new StringBuilder();
-//        queryRecords().forEach(player -> builder.append(player.get).append(", "));
-//        return builder.toString();
-//    }
-//
-//    public String formatAllInBlockList() {
-//        StringBuilder builder = new StringBuilder();
-//        whiteListConfig.getStringList("blocklist").forEach(player -> builder.append(player).append(", "));
-//        return builder.toString();
-//    }
 
     public enum RecordStatus{
        NO_RECORD, BLOCKED, WHITELISTED
