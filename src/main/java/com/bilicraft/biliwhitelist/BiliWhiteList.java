@@ -56,6 +56,11 @@ public final class BiliWhiteList extends Plugin implements Listener {
         return config;
     }
 
+    public void reload(){
+        config = null;
+        getConfig();
+    }
+
     @SneakyThrows
     @Override
     public void onEnable() {
@@ -72,6 +77,7 @@ public final class BiliWhiteList extends Plugin implements Listener {
         }
         //this.cache = new HashMapCache();
         this.resolver = new CacheForwardingService(HttpRepositoryService.forMinecraft(), cache);
+        ProxyServer.getInstance().getPluginManager().registerCommand(this, new ReloadCommand(this,"bcwhitelistreload"));
         ProxyServer.getInstance().getPluginManager().registerCommand(this, new WhiteListCommand(this,"bcwhitelist", "whitelist.admin"));
         ProxyServer.getInstance().getPluginManager().registerCommand(this, new InviteCommand(this,"bcinvite"));
         ProxyServer.getInstance().getPluginManager().registerCommand(this, new WhoInviteCommand(this,"bcwhoinvite"));

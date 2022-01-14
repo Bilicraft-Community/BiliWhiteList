@@ -23,6 +23,10 @@ public class WhiteListManager {
         if (!whiteListFile.exists()) whiteListFile.createNewFile();
         this.whiteListConfig = ConfigurationProvider.getProvider(YamlConfiguration.class).load(whiteListFile);
     }
+    @SneakyThrows
+    public void reload(){
+        this.whiteListConfig = ConfigurationProvider.getProvider(YamlConfiguration.class).load(whiteListFile);
+    }
 
     public boolean isWhiteListed(UUID player) {
         return whiteListConfig.getStringList("whitelist").contains(player.toString());
