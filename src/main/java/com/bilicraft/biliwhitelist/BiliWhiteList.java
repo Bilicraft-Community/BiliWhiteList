@@ -80,12 +80,12 @@ public final class BiliWhiteList extends Plugin implements Listener {
 
         Configuration mysql = getConfig().getSection("mysql");
         MySQLCore core = new MySQLCore(this,
-                getConfig().getString("host"),
-                getConfig().getString("user"),
-                getConfig().getString("pass"),
-                getConfig().getString("database"),
-                getConfig().getInt("port"),
-                getConfig().getBoolean("usessl")
+                mysql.getString("host"),
+                mysql.getString("user"),
+                mysql.getString("pass"),
+                mysql.getString("database"),
+                mysql.getInt("port"),
+                mysql.getBoolean("usessl")
                 );
         this.databaseManager = new DatabaseManager(this,core);
         this.whiteListManager = new WhiteListManager(this);
@@ -136,7 +136,7 @@ public final class BiliWhiteList extends Plugin implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void serverSwitch(ServerConnectEvent event) {
-        if (getConfig().getStringList("excludes").contains(event.getTarget().getName())) {
+        if (!getWhiteListManager().isSeverRequireWhiteList(event.getTarget().getName())) {
             getLogger().info("玩家 " + event.getPlayer().getName() + " # " + event.getPlayer().getUniqueId() + " 例外列表放行： " + event.getTarget().getName());
             return;
         }
@@ -161,7 +161,7 @@ public final class BiliWhiteList extends Plugin implements Listener {
         }
         this.cache.put(new Profile(playerUniqueId,event.getConnection().getName()));
         String forcedHost = getForcedHost(event.getConnection().getVirtualHost().getHostString());
-        if (getConfig().getStringList("excludes").contains(forcedHost)) {
+        if (!getWhiteListManager().isSeverRequireWhiteList(forcedHost)) {
             getLogger().info("玩家 " + event.getConnection().getName() + " # " + event.getConnection().getUniqueId() + " 例外列表放行： " + forcedHost);
 //            if(!whiteListManager.isAllowed(playerUniqueId)) {
 //                Util.broadcast(ChatColor.GRAY+"无白名单玩家 "+event.getConnection().getName()+" 正在加入豁免服务器: "+forcedHost);
