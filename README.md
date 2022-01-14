@@ -17,7 +17,7 @@ BilicraftWhiteList 的BC版本
 ## 命令
 
 * /bcwhitelist add <player> - 将指定玩家加入白名单
-* /whitelist remove <player> - 将指定玩家从白名单移除（包括回绝状态）
-* /whitelist query <player> - 查询玩家白名单状态(无/管理添加/玩家邀请/回绝)
-* /whitelist list <random player> - 输出所有白名单玩家列表
-* /whitelist block <player> - 回绝特定玩家
+* /bcwhitelist remove <player> - 将指定玩家从白名单移除（包括回绝状态）
+* /bcwhitelist query <player> - 查询玩家白名单状态(无/管理添加/玩家邀请/回绝)
+* /bcwhitelist list <random player> - 输出所有白名单玩家列表
+* /bcwhitelist block <player> - 回绝特定玩家
