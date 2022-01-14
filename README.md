@@ -1,6 +1,10 @@
 # BiliWhiteList
 BilicraftWhiteList 的BC版本
 
+## MySQL
+
+本插件需要 MySQL 支持。
+
 ## 插件特性
 
 * 白名单管理，拒绝无白名单玩家加入服务器
@@ -8,14 +12,12 @@ BilicraftWhiteList 的BC版本
 * 玩家邀请，支持玩家使用 `/invite` 命令邀请
 * 回绝名单管理，被加入回绝名单的玩家无法被邀请或再次添加白名单
 * 邀请历史查询，双向历史查询，查看玩家邀请了谁/谁被谁邀请
+* 基于 MySQL 的多实例支持
 
 ## 命令
 
-* /whitelist add <player> - 将指定玩家加入白名单
-* /whitelist remove <player> - 将指定玩家从白名单移除
+* /bcwhitelist add <player> - 将指定玩家加入白名单
+* /whitelist remove <player> - 将指定玩家从白名单移除（包括回绝状态）
 * /whitelist query <player> - 查询玩家白名单状态(无/管理添加/玩家邀请/回绝)
 * /whitelist list <random player> - 输出所有白名单玩家列表
 * /whitelist block <player> - 回绝特定玩家
-* /whitelist unblock <player> - 取消回绝特定玩家
-* /whitelist silentban <player> - 静默封禁指定玩家，被静默封禁的玩家尝试连接服务器的时候，连接将被强制掐断，玩家只能看到连接错误，而不是封禁信息
-* /whitelist unsilentban <player> - 取消静默封禁指定玩家
