@@ -131,7 +131,7 @@ public class WhiteListManager {
 
     public boolean isSeverRequireWhiteList(@NotNull String server) {
         try (Connection connection = plugin.getDatabaseManager().getConnection()) {
-            PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM `" + recordsTableName + "` WHERE server = ? LIMIT 1");
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM `" + serversTableName + "` WHERE server = ? LIMIT 1");
             preparedStatement.setString(1, server);
             return preparedStatement.execute();
         } catch (SQLException exception) {
